@@ -4,6 +4,7 @@ import time
 
 DB = "记账.db"
 
+
 def pre_load():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -44,6 +45,11 @@ def pre_load():
     )
     """)
 
+    if not c.execute("SELECT start_money FROM 设置").fetchone():
+        c.execute("INSERT INTO 设置 (start_money) VALUES (?)", (0,))
+    conn.commit()
+
+
 
 def a_record(operation_type, operation_money, operation_remark, operation_date, plan_money_key=None):
     conn = sqlite3.connect(DB)
@@ -63,12 +69,25 @@ def all_show():
                                     ORDER BY operation_date DESC"""):
         print(f'==========记录==========\n[类型]:{a1}\n[金额]:{a2}\n[备注]:{a3}\n[日期]:{a4}\n=======================')
 
+def show_balance():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    start = c.execute("""SELECT start_money FROM 设置""").fetchone()[0]
+    income = c.execute("""SELECT SUM(operation_money) FROM 记录 
+                          WHERE operation_type = ?""", ('收入',)).fetchone()[0] or 0
+    expense = c.execute("""SELECT SUM(operation_money) FROM 记录 
+                           WHERE operation_type = ?""", ('支出',)).fetchone()[0] or 0
+    balance = start + income - expense
+    print(f"当前余额：{balance}")
+    conn.close()
+
+
 
 
 def main():
     pre_load()
     while True:
-        print('打印菜单：   \n1. 记一笔    \n2. 看全部    \n0. 退出')
+        print('打印菜单：   \n1. 记一笔    \n2. 看全部    \n3.看余额    \n0. 退出     ')
         choice = input("请选择：")
         if choice == '1':
             operation_type = input("请输入类型：")
@@ -79,6 +98,8 @@ def main():
             a_record(operation_type, operation_money, operation_remark, operation_date)
         elif choice == '2':
             all_show()
+        elif choice == '3':
+            show_balance()
         elif choice == '0':
             break
 if __name__ == "__main__":
