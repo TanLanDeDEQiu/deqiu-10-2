@@ -413,3 +413,102 @@ main {
 }
 
 #targets.deleting .tcard-del { display: flex; }
+
+/* ---- 预算卡片（右边一根竖条）---- */
+.pcard {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    color: #fff;
+}
+
+.pcard-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #3b6ef5, #11998e);
+}
+
+.pcard:nth-child(2n) .pcard-bg {
+    background: linear-gradient(135deg, #8e5bf5, #3b6ef5);
+}
+
+.pcard:nth-child(3n) .pcard-bg {
+    background: linear-gradient(135deg, #f2994a, #e0524f);
+}
+
+.pcard-body {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding: 16px 18px;
+}
+
+.pcard-info { flex: 1; }
+
+.pcard-name {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.pcard-line {
+    font-size: 12.5px;
+    opacity: 0.88;
+    line-height: 1.7;
+}
+
+.pcard-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.vbar {
+    width: 8px;
+    height: 72px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.32);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+}
+
+.vbar i {
+    display: block;
+    width: 100%;
+    border-radius: 4px;
+    background: #fff;
+    transition: height 0.3s;
+}
+
+.pcard-pct {
+    font-size: 11.5px;
+    opacity: 0.92;
+}
+
+/* 预算卡片右上角那个删除小叉 */
+.pcard-del {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--out);
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
+}
+
+#plans.deleting .pcard-del { display: flex; }
+
+.pcard-del { z-index: 2; }

@@ -128,6 +128,12 @@ def show_balance(balance):
 
 #预算
 def create_plan(plan_money_purpose,plan_money,plan_picture):
+    try:
+        plan_money = float(plan_money)
+    except (TypeError, ValueError):
+        raise ValueError(f"预算不是数字：{plan_money}")
+    if plan_money <= 0:
+        raise ValueError(f"预算必须大于 0：{plan_money}")
     conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute("""
@@ -163,6 +169,21 @@ def update_plan(plan_money_key, new_money):
     print(f"改了{c.rowcount}行")
     conn.commit()
     conn.close()
+
+def get_plans():
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    plans = c.execute("""SELECT plan_money_key, plan_money_purpose, plan_money, plan_picture, plan_created_at FROM 预算""").fetchall()
+    result = []
+    for p in plans:
+        item = dict(p)
+        item['used'] = c.execute("SELECT SUM(operation_money) FROM 记录 WHERE plan_money_key = ?",(p['plan_money_key'],)).fetchone()[0] or 0
+        item['left'] = p['plan_money'] - item['used']
+        item['left_pct'] = item['left'] / p['plan_money'] * 100
+        result.append(item)
+    conn.close()
+    return result
 
 
 

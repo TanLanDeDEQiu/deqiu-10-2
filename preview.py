@@ -37,6 +37,13 @@ window.pywebview = { api: {
     ],
     create_target: async () => null,
     delete_target: async () => null,
+    get_plans: async () => [
+        {plan_money_key: 1, plan_money_purpose: "伙食费", plan_money: 2000.0, plan_picture: null, used: 200.0, left: 1800.0, left_pct: 90.0},
+        {plan_money_key: 2, plan_money_purpose: "话费", plan_money: 100.0, plan_picture: null, used: 0, left: 100.0, left_pct: 100.0},
+        {plan_money_key: 3, plan_money_purpose: "买书", plan_money: 300.0, plan_picture: null, used: 380.0, left: -80.0, left_pct: -26.67},
+    ],
+    create_plan: async () => null,
+    delete_plan: async () => null,
 }};
 window.dispatchEvent(new Event("pywebviewready"));
 setTimeout(() => {
@@ -50,6 +57,15 @@ setTimeout(() => {
     if (location.hash === "#tdel") {
         markTab("target"); showPage("target");
         document.getElementById("btn-del-target").click();
+    }
+    if (location.hash === "#plan") { markTab("plan"); showPage("plan"); }
+    if (location.hash === "#pnew") {
+        markTab("plan"); showPage("plan");
+        document.getElementById("btn-new-plan").click();
+    }
+    if (location.hash === "#pdel") {
+        markTab("plan"); showPage("plan");
+        document.getElementById("btn-del-plan").click();
     }
 }, 150);
 </script>

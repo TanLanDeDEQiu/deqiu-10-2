@@ -43,6 +43,15 @@ class Api:
     def delete_target(self, target_key):
         main.delete_target(target_key)
 
+    def get_plans(self):
+        return main.get_plans()
+
+    def create_plan(self, purpose, money):
+        main.create_plan(purpose, money, None)
+
+    def delete_plan(self, plan_money_key):
+        main.delete_plan(plan_money_key)
+
 
 if __name__ == "__main__":
     webview.create_window(

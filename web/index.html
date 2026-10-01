@@ -34,7 +34,11 @@
 
         <!-- 预算 -->
         <section class="page" id="page-plan">
-            <div class="list-head"><span>预算</span></div>
+            <div class="sub-head">
+                <span class="sub-title">预算</span>
+                <button class="link" id="btn-new-plan">创建新的</button>
+                <button class="link danger" id="btn-del-plan">删除一个</button>
+            </div>
             <div class="cards" id="plans"></div>
         </section>
 
@@ -113,6 +117,29 @@
 
             <div class="err" id="t-err"></div>
             <button class="primary" id="btn-save-target">保存</button>
+        </div>
+    </div>
+
+    <!-- 创建预算 -->
+    <div class="sheet-mask" id="plan-sheet">
+        <div class="sheet">
+            <div class="sheet-head">
+                <span>创建预算</span>
+                <button class="close" id="btn-close-plan">×</button>
+            </div>
+
+            <div class="field">
+                <span class="field-label">预算目的</span>
+                <input type="text" id="p-purpose" placeholder="比如：伙食费">
+            </div>
+
+            <div class="field">
+                <span class="field-label">预算</span>
+                <input type="number" id="p-money" placeholder="0.00" step="0.01">
+            </div>
+
+            <div class="err" id="p-err"></div>
+            <button class="primary" id="btn-save-plan">保存</button>
         </div>
     </div>
 

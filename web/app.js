@@ -5,6 +5,7 @@ window.addEventListener("pywebviewready", async () => {
     setupSheet();
     setupAllPage();
     setupTargetPage();
+    setupPlanPage();
     await refresh();
 });
 
@@ -36,6 +37,9 @@ async function refresh() {
 
     const targets = await pywebview.api.get_targets();
     document.getElementById("targets").innerHTML = targets.map(targetCard).join("");
+
+    const plans = await pywebview.api.get_plans();
+    document.getElementById("plans").innerHTML = plans.map(planCard).join("");
 }
 
 
@@ -133,6 +137,88 @@ async function saveTarget() {
     }
 
     document.getElementById("target-sheet").classList.remove("show");
+    await refresh();
+}
+
+
+// 一条预算 → 一张卡片
+function planCard(plan) {
+    const height = Math.max(0, Math.min(plan.left_pct, 100));
+    const over = plan.left < 0;        // 花超了
+
+    return `
+        <div class="pcard">
+            <div class="pcard-bg"></div>
+            <button class="pcard-del" data-key="${plan.plan_money_key}">×</button>
+            <div class="pcard-body">
+                <div class="pcard-info">
+                    <div class="pcard-name">${plan.plan_money_purpose}</div>
+                    <div class="pcard-line">预算　　${plan.plan_money.toFixed(2)}</div>
+                    <div class="pcard-line">已支出　${plan.used.toFixed(2)}</div>
+                    <div class="pcard-line">剩余　　${plan.left.toFixed(2)}</div>
+                </div>
+                <div class="pcard-side">
+                    <div class="vbar"><i style="height: ${height}%"></i></div>
+                    <div class="pcard-pct">${over ? "超支" : plan.left_pct.toFixed(0) + "%"}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
+// ---- 预算的 创建 / 删除 ----
+
+function setupPlanPage() {
+    const mask = document.getElementById("plan-sheet");
+
+    document.getElementById("btn-new-plan").addEventListener("click", () => {
+        document.getElementById("p-purpose").value = "";
+        document.getElementById("p-money").value = "";
+        document.getElementById("p-err").textContent = "";
+        mask.classList.add("show");
+        document.getElementById("p-purpose").focus();
+    });
+
+    document.getElementById("btn-close-plan").addEventListener("click", () => {
+        mask.classList.remove("show");
+    });
+
+    mask.addEventListener("click", (e) => {
+        if (e.target === mask) mask.classList.remove("show");
+    });
+
+    document.getElementById("btn-save-plan").addEventListener("click", savePlan);
+
+    document.getElementById("btn-del-plan").addEventListener("click", () => {
+        document.getElementById("plans").classList.toggle("deleting");
+    });
+
+    document.getElementById("plans").addEventListener("click", async (e) => {
+        const btn = e.target.closest(".pcard-del");
+        if (!btn) return;
+        await pywebview.api.delete_plan(Number(btn.dataset.key));
+        await refresh();
+    });
+}
+
+
+async function savePlan() {
+    const purpose = document.getElementById("p-purpose").value;
+    const money = document.getElementById("p-money").value;
+    const errBox = document.getElementById("p-err");
+
+    if (purpose === "") { errBox.textContent = "预算目的还没写"; return; }
+    if (money === "") { errBox.textContent = "预算金额还没填"; return; }
+
+    try {
+        await pywebview.api.create_plan(purpose, money);
+    } catch (e) {
+        errBox.textContent = String(e);
+        return;
+    }
+
+    document.getElementById("plan-sheet").classList.remove("show");
     await refresh();
 }
 
