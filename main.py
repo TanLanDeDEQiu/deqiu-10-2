@@ -87,9 +87,22 @@ def delete_record(main_key):
     conn.commit()
     conn.close()
 
+def ask_key(prompt):
+    while True:
+        raw = input(prompt)
+        if raw.isdigit():
+            return int(raw)
+        print("编号得是数字")
+
 
 #记录
 def a_record(operation_type, operation_money, operation_remark, operation_date, plan_money_key=None):
+    if operation_type not in ("支出","收入"):
+        raise ValueError(f"类型不对：{operation_type}")
+    try:
+        operation_money = float(operation_money)
+    except (TypeError,ValueError):
+        raise ValueError(f"金额不是数字：{operation_money}")
     conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute(
@@ -154,9 +167,24 @@ def delete_plan(plan_money_key):
     conn.commit()
     conn.close()
 
+def update_plan(plan_money_key, new_money):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("""UPDATE 预算 SET plan_money = ? WHERE plan_money_key = ?""", (new_money,plan_money_key,))
+    print(f"改了{c.rowcount}行")
+    conn.commit()
+    conn.close()
+
+
 
 #目标
 def create_target(target_name, target_money, target_rate, target_picture):
+    try:
+        target_rate = float(target_rate)
+    except (TypeError, ValueError):
+        raise ValueError(f"占比不是数字：{target_rate}")
+    if target_rate <= 0:
+        raise ValueError(f"占比必须大于 0：{target_rate}")
     conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute("""
@@ -197,12 +225,15 @@ def main():
             operation_money = input("请输入金额：")
             operation_remark = input("请输入备注：")
             operation_date = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-            print(f"已添加一条记录。\n[类型]:{operation_type}\n[金额]:{operation_money}\n[备注]:{operation_remark}\n[日期]:{operation_date}")
             if operation_type == '预算支出':
                 all_show_plan()
-                plan_money_key = input("挂在哪个预算上（输编号）：")
+                plan_money_key = ask_key("挂在哪个预算上（输编号）：")
                 operation_type = '支出'  # ⭐ 这一行是关键
-            a_record(operation_type, operation_money, operation_remark, operation_date, plan_money_key)
+            try:
+                a_record(operation_type, operation_money, operation_remark, operation_date, plan_money_key)
+                print(f"已添加一条记录。\n[类型]:{operation_type}\n[金额]:{operation_money}\n[备注]:{operation_remark}\n[日期]:{operation_date}")
+            except ValueError as e:
+                print(f"没记上：{e}")
         elif choice == '2':
             while True:
                 print("==========查看类型==========\n1.看全部\n2.看所有目标\n3.看所有预算\n4.只看收入\n5.只看支出\n0.退出")
@@ -225,7 +256,7 @@ def main():
             set_start_money()
         elif choice == '5':
             while True:
-                print("\n1.创建新的预算计划    \n2.查看所有的预算    \n3.删除一个预算    \n0.退出")
+                print("\n1.创建新的预算计划    \n2.查看所有的预算    \n3.删除一个预算    \n4追加预算    \n0.退出")
                 choice1 = input("请选择：")
                 if choice1 == '1':
                     plan_money_purpose = input("请输入预算目的：")
@@ -236,8 +267,13 @@ def main():
                     all_show_plan()
                 elif choice1 == '3':
                     all_show_plan()
-                    plan_money_key = input("请输入要删除预算的对应编号：")
+                    plan_money_key = ask_key("请输入要删除预算的对应编号：")
                     delete_plan(plan_money_key)
+                elif choice1 == '4':
+                    all_show_plan()
+                    plan_money_key = ask_key("改哪条（输编号）：")
+                    new_money = input("新的预算金额：")
+                    update_plan(plan_money_key, new_money)
                 elif choice1 == '0':
                     break
         elif choice == '6':
@@ -249,18 +285,22 @@ def main():
                     target_money = input("请输入目标金额：")
                     target_rate = input("请输入占比：")
                     target_picture = None
-                    create_target(target_name,target_money,target_rate,target_picture)
+                    try:
+                        create_target(target_name, target_money, target_rate, target_picture)
+                        print("目标创建好了")
+                    except ValueError as e:
+                        print(f"没建成：{e}")
                 elif choice2 == '2':
                     all_show_target()
                 elif choice2 == '3':
                     all_show_target()
-                    target_key = input("请输入要删除目标的对应编号：")
+                    target_key = ask_key("请输入要删除目标的对应编号：")
                     delete_target(target_key)
                 elif choice2 == '0':
                     break
         elif choice == '7':
             all_show()
-            main_key = input("请输入要删除记录的对应编号：")
+            main_key = ask_key("请输入要删除记录的对应编号：")
             delete_record(main_key)
         elif choice == '0':
             break

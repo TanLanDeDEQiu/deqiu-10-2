@@ -1,0 +1,33 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Microsoft YaHei", sans-serif;
+    background: #f5f6f8;
+    color: #222;
+    padding: 28px 22px;
+    user-select: none;
+}
+
+header {
+    background: #fff;
+    border-radius: 18px;
+    padding: 26px 24px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.06);
+}
+
+header .label {
+    font-size: 13px;
+    color: #8a8f99;
+    letter-spacing: 1px;
+}
+
+header .balance {
+    margin-top: 10px;
+    font-size: 40px;
+    font-weight: 600;
+    color: #1c1f24;
+}
