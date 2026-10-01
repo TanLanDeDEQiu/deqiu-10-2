@@ -5,3 +5,6 @@ a = f"{a:04d}"
 print(a)
 import main
 print(main.get_records())
+import main
+print(main.DB)
+print(main.get_balance())

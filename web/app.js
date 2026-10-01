@@ -31,6 +31,8 @@ function setupTabs() {
 async function refresh() {
     const balance = await pywebview.api.get_balance();
     document.getElementById("balance").textContent = balance.toFixed(2);
+    // 余额变负，整张卡翻红
+    document.querySelector(".balance-card").classList.toggle("minus", balance < 0);
 
     const rows = await pywebview.api.get_records(null, 5);
     document.getElementById("records").innerHTML = rows.map(rowCard).join("");
@@ -64,10 +66,16 @@ function rowCard(record) {
 // 一条目标 → 一张卡片
 function targetCard(target) {
     const pct = Math.min(target.progress, 100);   // 进度条最多画满
+    const pic = target.picture_data
+        ? `<img class="card-pic" src="${target.picture_data}" alt="">`
+        : "";
+
+    const cls = target.picture_data ? "tcard has-pic" : "tcard";
 
     return `
-        <div class="tcard">
+        <div class="${cls}">
             <div class="tcard-bg"></div>
+            ${pic}
             <button class="tcard-del" data-key="${target.target_key}">×</button>
             <div class="tcard-body">
                 <div class="tcard-name">${target.target_name}</div>
@@ -82,6 +90,10 @@ function targetCard(target) {
 
 // ---- 目标的 创建 / 删除 ----
 
+// 表单里选好的图是哪一张（没选就是 null）
+let pickedTargetPic = null;
+let pickedPlanPic = null;
+
 function setupTargetPage() {
     const mask = document.getElementById("target-sheet");
 
@@ -90,8 +102,17 @@ function setupTargetPage() {
         document.getElementById("t-money").value = "";
         document.getElementById("t-rate").value = "";
         document.getElementById("t-err").textContent = "";
+        pickedTargetPic = null;
+        document.getElementById("t-picked").textContent = "";
         mask.classList.add("show");
         document.getElementById("t-name").focus();
+    });
+
+    document.getElementById("t-pick").addEventListener("click", async () => {
+        const name = await pywebview.api.pick_image();
+        if (!name) return;                       // 用户点了取消
+        pickedTargetPic = name;
+        document.getElementById("t-picked").textContent = name;
     });
 
     document.getElementById("btn-close-target").addEventListener("click", () => {
@@ -130,7 +151,7 @@ async function saveTarget() {
     if (rate === "") { errBox.textContent = "占比还没填"; return; }
 
     try {
-        await pywebview.api.create_target(name, money, rate);
+        await pywebview.api.create_target(name, money, rate, pickedTargetPic);
     } catch (e) {
         errBox.textContent = String(e);
         return;
@@ -145,10 +166,16 @@ async function saveTarget() {
 function planCard(plan) {
     const height = Math.max(0, Math.min(plan.left_pct, 100));
     const over = plan.left < 0;        // 花超了
+    const pic = plan.picture_data
+        ? `<img class="card-pic" src="${plan.picture_data}" alt="">`
+        : "";
+
+    const cls = plan.picture_data ? "pcard has-pic" : "pcard";
 
     return `
-        <div class="pcard" data-key="${plan.plan_money_key}">
+        <div class="${cls}" data-key="${plan.plan_money_key}">
             <div class="pcard-bg"></div>
+            ${pic}
             <button class="pcard-del" data-key="${plan.plan_money_key}">×</button>
             <div class="pcard-body">
                 <div class="pcard-info">
@@ -176,8 +203,17 @@ function setupPlanPage() {
         document.getElementById("p-purpose").value = "";
         document.getElementById("p-money").value = "";
         document.getElementById("p-err").textContent = "";
+        pickedPlanPic = null;
+        document.getElementById("p-picked").textContent = "";
         mask.classList.add("show");
         document.getElementById("p-purpose").focus();
+    });
+
+    document.getElementById("p-pick").addEventListener("click", async () => {
+        const name = await pywebview.api.pick_image();
+        if (!name) return;
+        pickedPlanPic = name;
+        document.getElementById("p-picked").textContent = name;
     });
 
     document.getElementById("btn-close-plan").addEventListener("click", () => {
@@ -266,7 +302,7 @@ async function savePlan() {
     if (money === "") { errBox.textContent = "预算金额还没填"; return; }
 
     try {
-        await pywebview.api.create_plan(purpose, money);
+        await pywebview.api.create_plan(purpose, money, pickedPlanPic);
     } catch (e) {
         errBox.textContent = String(e);
         return;

@@ -7,6 +7,7 @@
 原理：临时造一个 _preview.html，把 Python 那边的接口 mock 成假数据，
       丢给「无头 Edge」截图，截完把临时文件删掉。
 """
+import base64
 import pathlib
 import subprocess
 import sys
@@ -14,12 +15,31 @@ import sys
 BASE = pathlib.Path(__file__).parent
 WEB = BASE / "web"
 EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+IMG_DIR = pathlib.Path(r"D:\记账本数据\images")
+
+
+def first_image_data():
+    """预览时拿 images\ 里第一张真图当背景，好看清效果。"""
+    if not IMG_DIR.exists():
+        return "null"
+    for f in sorted(IMG_DIR.iterdir()):
+        ext = f.suffix.lstrip(".").lower()
+        if ext in ("png", "jpg", "jpeg", "webp", "bmp"):
+            with open(f, "rb") as fh:
+                body = base64.b64encode(fh.read()).decode()
+            if ext == "jpg":
+                ext = "jpeg"
+            return f'"data:image/{ext};base64,{body}"'
+    return "null"
+
+
+PIC = first_image_data()
 
 # 假数据，只为了看界面长相
 MOCK = """
 <script>
 window.pywebview = { api: {
-    get_balance: async () => 4300.0,
+    get_balance: async () => (location.hash === "#minus" ? -200.0 : 4300.0),
     get_records: async () => [
         {main_key: 4, operation_type: "支出", operation_money: 200.0, operation_remark: "午饭", operation_date: "2026-10-01"},
         {main_key: 2, operation_type: "收入", operation_money: 500.0, operation_remark: "零花钱", operation_date: "2026-09-30"},
@@ -32,8 +52,8 @@ window.pywebview = { api: {
         return {count: 3, income: 500.0, expense: 328.5};
     },
     get_targets: async () => [
-        {target_key: 1, target_name: "买电脑", target_money: 30000.0, target_rate: 0.3, target_picture: null, need: 100000.0, progress: 4.3},
-        {target_key: 2, target_name: "相机", target_money: 8000.0, target_rate: 0.5, target_picture: null, need: 16000.0, progress: 26.88},
+        {target_key: 1, target_name: "买电脑", target_money: 30000.0, target_rate: 0.3, target_picture: "x.jpg", picture_data: __PIC__, need: 100000.0, progress: 4.3},
+        {target_key: 2, target_name: "相机", target_money: 8000.0, target_rate: 0.5, target_picture: null, picture_data: null, need: 16000.0, progress: 26.88},
     ],
     create_target: async () => null,
     delete_target: async () => null,
@@ -44,6 +64,7 @@ window.pywebview = { api: {
     ],
     create_plan: async () => null,
     delete_plan: async () => null,
+    pick_image: async () => null,
     update_plan: async () => 1,
 }};
 window.dispatchEvent(new Event("pywebviewready"));
@@ -88,12 +109,15 @@ def main():
 
     html = (WEB / "index.html").read_text(encoding="utf-8")
     html = html.replace('<script src="app.js"></script>',
-                        '<script src="app.js"></script>' + MOCK)
+                        '<script src="app.js"></script>' + MOCK.replace("__PIC__", PIC))
 
     preview = WEB / "_preview.html"
     preview.write_text(html, encoding="utf-8")
 
-    out = BASE / (f"preview-{mode}.png" if mode else "preview.png")
+    # 图都放进 preview\ 子文件夹，别跟代码混在根目录
+    out_dir = BASE / "preview"
+    out_dir.mkdir(exist_ok=True)
+    out = out_dir / (f"{mode}.png" if mode else "home.png")
     url = preview.as_uri() + (f"#{mode}" if mode else "")
     subprocess.run([
         EDGE, "--headless=new", "--disable-gpu", "--hide-scrollbars",

@@ -55,6 +55,12 @@ main {
     letter-spacing: 0.5px;
 }
 
+/* 余额变成负数：整张卡翻成红橙 */
+.balance-card.minus {
+    background: linear-gradient(135deg, #e0524f, #c0392b);
+    box-shadow: 0 8px 24px rgba(224, 82, 79, 0.35);
+}
+
 /* ---- 小标题行 ---- */
 .list-head {
     display: flex;
@@ -252,6 +258,48 @@ main {
 .field select:focus { border-color: var(--brand); }
 
 .seg .seg-item { font-size: 13px; }
+
+/* 选图片那一行 */
+.pick {
+    padding: 9px 16px;
+    border: 1px dashed #c7cdd8;
+    border-radius: 11px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    cursor: pointer;
+}
+
+.pick:hover { border-color: var(--brand); color: var(--brand); }
+
+.picked {
+    margin-left: 10px;
+    font-size: 12.5px;
+    color: var(--ink-3);
+}
+
+/* 卡片上的背景图 */
+.card-pic {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 有背景图的卡片：正文浮在遮罩之上 */
+.has-pic .tcard-body,
+.has-pic .pcard-body { z-index: 1; }
+
+/* 有背景图时，压一层由下往上的暗色 —— 白字才看得清 */
+.has-pic::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(10, 14, 24, 0.68), rgba(10, 14, 24, 0.12));
+}
 
 .err {
     min-height: 18px;

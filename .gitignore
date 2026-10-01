@@ -6,4 +6,4 @@ __pycache__/
 记账.db
 
 # 界面预览图（随时能重新生成）
-preview*.png
+preview/

@@ -1,8 +1,13 @@
 import sqlite3
 import time
+import os
+import base64
+import shutil
 
 
-DB = "记账.db"
+APP_DIR = r"D:\记账本数据"
+os.makedirs(os.path.join(APP_DIR, "images"), exist_ok=True)
+DB = os.path.join(APP_DIR, "记账.db")
 
 
 def pre_load():
@@ -285,6 +290,27 @@ def get_summary(only=None):
     return {"count":count,"income":income,"expense":expense}
 
 
+def save_image(src_path):
+    name = os.path.basename(src_path)
+    target = os.path.join(APP_DIR, "images", name)
+    if os.path.exists(target):
+        name = f"{int(time.time())}_{name}"
+        target = os.path.join(APP_DIR, "images", name)
+    shutil.copy2(src_path, target)
+    return name
+
+def read_image(filename):
+    if not filename:
+        return None
+    path = os.path.join(APP_DIR, "images", filename)
+    if not os.path.exists(path):
+        return None
+    with open(path, 'rb') as f:
+        raw = base64.b64encode(f.read()).decode()
+    ext = os.path.splitext(filename)[1].lstrip('.').lower()
+    if ext == 'jpg':
+        ext = 'jpeg'
+    return f"data:image/{ext};base64,{raw}"
 
 
 def main():

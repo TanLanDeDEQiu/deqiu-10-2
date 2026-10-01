@@ -35,25 +35,42 @@ class Api:
         return main.get_summary(only)
 
     def get_targets(self):
-        return main.get_targets()
+        targets = main.get_targets()
+        for t in targets:
+            t["picture_data"] = main.read_image(t["target_picture"])
+        return targets
 
-    def create_target(self, name, money, rate):
-        main.create_target(name, money, rate, None)
+    def create_target(self, name, money, rate, picture=None):
+        main.create_target(name, money, rate, picture)
 
     def delete_target(self, target_key):
         main.delete_target(target_key)
 
     def get_plans(self):
-        return main.get_plans()
+        plans = main.get_plans()
+        for p in plans:
+            p["picture_data"] = main.read_image(p["plan_picture"])
+        return plans
 
-    def create_plan(self, purpose, money):
-        main.create_plan(purpose, money, None)
+    def create_plan(self, purpose, money, picture=None):
+        main.create_plan(purpose, money, picture)
 
     def delete_plan(self, plan_money_key):
         main.delete_plan(plan_money_key)
 
     def update_plan(self, plan_money_key, new_money):
         return main.update_plan(plan_money_key, new_money)
+
+    def pick_image(self):
+        """弹系统对话框让用户选图；选完复制进 images\\，返回文件名。"""
+        paths = webview.windows[0].create_file_dialog(
+            webview.FileDialog.OPEN,
+            allow_multiple=False,
+            file_types=("图片 (*.png;*.jpg;*.jpeg;*.webp;*.bmp)",),
+        )
+        if not paths:
+            return None              # 用户点了取消
+        return main.save_image(paths[0])
 
 
 if __name__ == "__main__":
