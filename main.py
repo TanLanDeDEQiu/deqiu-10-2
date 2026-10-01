@@ -3,7 +3,7 @@ import time
 import os
 import base64
 import shutil
-
+from PIL import Image
 
 APP_DIR = r"D:\记账本数据"
 os.makedirs(os.path.join(APP_DIR, "images"), exist_ok=True)
@@ -311,6 +311,50 @@ def read_image(filename):
     if ext == 'jpg':
         ext = 'jpeg'
     return f"data:image/{ext};base64,{raw}"
+
+#废函数
+def trim_white(path,tolerance=10):
+    img = Image.open(path)
+    if img.mode in ("RGBA", "LA", "P"):
+        bg = Image.new("RGB", img.size, (255, 255, 255))
+        bg.paste(img,mask=img.convert("RGBA").split()[-1])
+        img = bg
+    else:
+        img = img.convert("RGB")
+    w,h = img.size
+    px = img.load()
+    step = max(1, w//200)
+
+    def row_white(y):
+        return all(all(ch >= 255 - tolerance for ch in px[x, y]) for x in range(0, w, step))
+
+    def col_white(x):
+        return all(all(ch >= 255 - tolerance for ch in px[x, y]) for y in range(0, h, step))
+
+    top = 0
+    while top < h - 1 and row_white(top):
+        top += 1
+    bottom = h - 1
+    while bottom > top and row_white(bottom):
+        bottom -= 1
+    left = 0
+    while left < w - 1 and col_white(left):
+        left += 1
+    right = w - 1
+    while right > left and col_white(right):
+        right -= 1
+    top,left = max(0, top - 2),max(0, left - 2)
+    bottom,right = min(h - 1, bottom + 2),min(w - 1, right + 2)
+    new_w, new_h = right - left + 1, bottom - top + 1
+    if new_w == w and new_h == h:
+        return False
+    if new_w < w * 0.2 or new_h < h * 0.2:
+        return False
+
+    img.crop((left, top, right + 1, bottom + 1)).save(path)
+    return True
+
+
 
 
 def main():

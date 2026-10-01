@@ -19,7 +19,7 @@ IMG_DIR = pathlib.Path(r"D:\记账本数据\images")
 
 
 def first_image_data():
-    """预览时拿 images\ 里第一张真图当背景，好看清效果。"""
+    """预览时拿 images 文件夹里第一张真图当背景，好看清效果。"""
     if not IMG_DIR.exists():
         return "null"
     for f in sorted(IMG_DIR.iterdir()):

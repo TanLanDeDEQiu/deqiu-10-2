@@ -286,6 +286,7 @@ main {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
 }
 
 /* 有背景图的卡片：正文浮在遮罩之上 */
@@ -395,6 +396,7 @@ main {
     border-radius: 18px;
     overflow: hidden;
     min-height: 132px;
+    aspect-ratio: 16 / 9;          /* 卡片统一按 16:9 定高 */
     box-shadow: var(--shadow);
     color: #fff;
 }
@@ -415,7 +417,7 @@ main {
 
 .tcard-body {
     position: relative;
-    min-height: 132px;
+    height: 100%;
     padding: 18px;
     display: flex;
     flex-direction: column;
@@ -483,6 +485,7 @@ main {
     position: relative;
     border-radius: 18px;
     overflow: hidden;
+    aspect-ratio: 16 / 9;
     box-shadow: var(--shadow);
     color: #fff;
 }
@@ -503,9 +506,11 @@ main {
 
 .pcard-body {
     position: relative;
+    height: 100%;
     display: flex;
     gap: 14px;
     padding: 16px 18px;
+    align-items: flex-end;
 }
 
 .pcard-info { flex: 1; }
