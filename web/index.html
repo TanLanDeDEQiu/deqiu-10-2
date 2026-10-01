@@ -143,6 +143,24 @@
         </div>
     </div>
 
+    <!-- 加预算（改某条预算的金额）-->
+    <div class="sheet-mask" id="plan-edit-sheet">
+        <div class="sheet">
+            <div class="sheet-head">
+                <span id="pe-title">加预算</span>
+                <button class="close" id="btn-close-pedit">×</button>
+            </div>
+
+            <div class="field">
+                <span class="field-label">新的预算金额</span>
+                <input type="number" id="pe-money" placeholder="0.00" step="0.01">
+            </div>
+
+            <div class="err" id="pe-err"></div>
+            <button class="primary" id="btn-save-pedit">保存</button>
+        </div>
+    </div>
+
     <!-- 记一笔 -->
     <div class="sheet-mask" id="sheet-mask">
         <div class="sheet">

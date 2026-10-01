@@ -44,6 +44,7 @@ window.pywebview = { api: {
     ],
     create_plan: async () => null,
     delete_plan: async () => null,
+    update_plan: async () => 1,
 }};
 window.dispatchEvent(new Event("pywebviewready"));
 setTimeout(() => {
@@ -72,6 +73,10 @@ setTimeout(() => {
     if (location.hash === "#pdel") {
         markTab("plan"); showPage("plan");
         document.getElementById("btn-del-plan").click();
+    }
+    if (location.hash === "#pedit") {
+        markTab("plan"); showPage("plan");
+        document.querySelector("#plans .pcard").click();
     }
 }, 150);
 </script>

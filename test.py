@@ -5,4 +5,3 @@ a = f"{a:04d}"
 print(a)
 import main
 print(main.get_records())
-print(main.get_records('支出'))

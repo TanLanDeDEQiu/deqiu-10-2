@@ -52,6 +52,9 @@ class Api:
     def delete_plan(self, plan_money_key):
         main.delete_plan(plan_money_key)
 
+    def update_plan(self, plan_money_key, new_money):
+        return main.update_plan(plan_money_key, new_money)
+
 
 if __name__ == "__main__":
     webview.create_window(

@@ -130,12 +130,7 @@ def show_balance(balance):
 
 #预算
 def create_plan(plan_money_purpose,plan_money,plan_picture):
-    try:
-        plan_money = float(plan_money)
-    except (TypeError, ValueError):
-        raise ValueError(f"预算不是数字：{plan_money}")
-    if plan_money <= 0:
-        raise ValueError(f"预算必须大于 0：{plan_money}")
+    plan_money = check_money(plan_money,"预算")
     conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute("""
@@ -165,12 +160,24 @@ def delete_plan(plan_money_key):
     conn.close()
 
 def update_plan(plan_money_key, new_money):
+    new_money = check_money(new_money,"预算")
     conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute("""UPDATE 预算 SET plan_money = ? WHERE plan_money_key = ?""", (new_money,plan_money_key,))
-    print(f"改了{c.rowcount}行")
+    changed = c.rowcount
     conn.commit()
     conn.close()
+    return changed
+
+def check_money(raw, what="金额"):
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        raise ValueError(f"{what}不是数字:{raw}")
+    if value <= 0:
+        raise ValueError(f"{what}必须大于0:{raw}")
+    return value
+
 
 def get_plans():
     conn = sqlite3.connect(DB)

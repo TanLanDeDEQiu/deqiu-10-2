@@ -147,7 +147,7 @@ function planCard(plan) {
     const over = plan.left < 0;        // 花超了
 
     return `
-        <div class="pcard">
+        <div class="pcard" data-key="${plan.plan_money_key}">
             <div class="pcard-bg"></div>
             <button class="pcard-del" data-key="${plan.plan_money_key}">×</button>
             <div class="pcard-body">
@@ -196,10 +196,64 @@ function setupPlanPage() {
 
     document.getElementById("plans").addEventListener("click", async (e) => {
         const btn = e.target.closest(".pcard-del");
-        if (!btn) return;
-        await pywebview.api.delete_plan(Number(btn.dataset.key));
-        await refresh();
+        if (btn) {
+            await pywebview.api.delete_plan(Number(btn.dataset.key));
+            await refresh();
+            return;
+        }
+
+        // 点卡片本身 → 加预算
+        const card = e.target.closest(".pcard");
+        if (card) openPlanEdit(card);
     });
+
+    const editMask = document.getElementById("plan-edit-sheet");
+    document.getElementById("btn-close-pedit").addEventListener("click", () => {
+        editMask.classList.remove("show");
+    });
+    editMask.addEventListener("click", (e) => {
+        if (e.target === editMask) editMask.classList.remove("show");
+    });
+    document.getElementById("btn-save-pedit").addEventListener("click", savePlanEdit);
+}
+
+
+// 现在正在改哪一条预算
+let editingPlanKey = null;
+
+function openPlanEdit(card) {
+    const key = Number(card.dataset.key);
+    const name = card.querySelector(".pcard-name").textContent;
+    const now = card.querySelectorAll(".pcard-line")[0].textContent.replace(/[^\d.]/g, "");
+
+    editingPlanKey = key;
+    document.getElementById("pe-title").textContent = `加预算 · ${name}`;
+    document.getElementById("pe-money").value = now;
+    document.getElementById("pe-err").textContent = "";
+    document.getElementById("plan-edit-sheet").classList.add("show");
+    document.getElementById("pe-money").focus();
+}
+
+
+async function savePlanEdit() {
+    const money = document.getElementById("pe-money").value;
+    const errBox = document.getElementById("pe-err");
+
+    if (money === "") { errBox.textContent = "还没填金额"; return; }
+
+    try {
+        const changed = await pywebview.api.update_plan(editingPlanKey, money);
+        if (changed === 0) {
+            errBox.textContent = "没找到这条预算，可能已经被删了";
+            return;
+        }
+    } catch (e) {
+        errBox.textContent = String(e);
+        return;
+    }
+
+    document.getElementById("plan-edit-sheet").classList.remove("show");
+    await refresh();
 }
 
 
