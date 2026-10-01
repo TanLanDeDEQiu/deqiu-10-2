@@ -116,8 +116,8 @@ main {
 .tabbar {
     flex: none;
     display: flex;
-    background: rgba(255, 255, 255, 0.94);
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    background: #e9ebef;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
     padding: 7px 0 9px;
 }
 
@@ -556,6 +556,15 @@ main {
 .pcard-pct {
     font-size: 11.5px;
     opacity: 0.92;
+}
+
+/* 列表空的时候那句提示 */
+.empty {
+    padding: 36px 0;
+    text-align: center;
+    font-size: 13.5px;
+    line-height: 2;
+    color: var(--ink-3);
 }
 
 /* 预算卡片右上角那个删除小叉 */

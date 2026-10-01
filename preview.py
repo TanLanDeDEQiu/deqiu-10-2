@@ -40,28 +40,28 @@ MOCK = """
 <script>
 window.pywebview = { api: {
     get_balance: async () => (location.hash === "#minus" ? -200.0 : 4300.0),
-    get_records: async () => [
+    get_records: async () => (location.hash === "#empty" ? [] : [
         {main_key: 4, operation_type: "支出", operation_money: 200.0, operation_remark: "午饭", operation_date: "2026-10-01"},
         {main_key: 2, operation_type: "收入", operation_money: 500.0, operation_remark: "零花钱", operation_date: "2026-09-30"},
         {main_key: 1, operation_type: "支出", operation_money: 128.5, operation_remark: "话费充值", operation_date: "2026-09-28"},
-    ],
+    ]),
     add_record: async () => null,
     get_summary: async (only) => {
         if (only === "收入") return {count: 1, income: 500.0, expense: 0};
         if (only === "支出") return {count: 2, income: 0, expense: 328.5};
         return {count: 3, income: 500.0, expense: 328.5};
     },
-    get_targets: async () => [
+    get_targets: async () => (location.hash === "#empty" ? [] : [
         {target_key: 1, target_name: "买电脑", target_money: 30000.0, target_rate: 0.3, target_picture: "x.jpg", picture_data: __PIC__, need: 100000.0, progress: 4.3},
         {target_key: 2, target_name: "相机", target_money: 8000.0, target_rate: 0.5, target_picture: null, picture_data: null, need: 16000.0, progress: 26.88},
-    ],
+    ]),
     create_target: async () => null,
     delete_target: async () => null,
-    get_plans: async () => [
+    get_plans: async () => (location.hash === "#empty" ? [] : [
         {plan_money_key: 1, plan_money_purpose: "伙食费", plan_money: 2000.0, plan_picture: null, used: 200.0, left: 1800.0, left_pct: 90.0},
         {plan_money_key: 2, plan_money_purpose: "话费", plan_money: 100.0, plan_picture: null, used: 0, left: 100.0, left_pct: 100.0},
         {plan_money_key: 3, plan_money_purpose: "买书", plan_money: 300.0, plan_picture: null, used: 380.0, left: -80.0, left_pct: -26.67},
-    ],
+    ]),
     create_plan: async () => null,
     delete_plan: async () => null,
     pick_image: async () => null,

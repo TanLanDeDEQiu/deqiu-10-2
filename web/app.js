@@ -35,13 +35,24 @@ async function refresh() {
     document.querySelector(".balance-card").classList.toggle("minus", balance < 0);
 
     const rows = await pywebview.api.get_records(null, 5);
-    document.getElementById("records").innerHTML = rows.map(rowCard).join("");
+    renderList("records", rows, rowCard, "还没有记录<br>点右下角那个「记」");
 
     const targets = await pywebview.api.get_targets();
-    document.getElementById("targets").innerHTML = targets.map(targetCard).join("");
+    renderList("targets", targets, targetCard, "还没有目标<br>点右上角「创建新的」");
 
     const plans = await pywebview.api.get_plans();
-    document.getElementById("plans").innerHTML = plans.map(planCard).join("");
+    renderList("plans", plans, planCard, "还没有预算<br>记一笔的时候可以挂上去");
+}
+
+
+// 把一批东西画进某个容器。空了就说一句人话，别留一片白。
+function renderList(boxId, items, cardFn, emptyText) {
+    const box = document.getElementById(boxId);
+    if (items.length === 0) {
+        box.innerHTML = `<div class="empty">${emptyText}</div>`;
+        return;
+    }
+    box.innerHTML = items.map(cardFn).join("");
 }
 
 

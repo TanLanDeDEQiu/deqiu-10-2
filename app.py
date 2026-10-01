@@ -11,8 +11,13 @@ import webview
 import main
 
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+import sys
 
+if getattr(sys, "frozen", False):
+    BASE = sys._MEIPASS                                    # 打包后：临时解压目录
+else:
+    BASE = os.path.dirname(os.path.abspath(__file__))       # 平时：文件旁边
+    
 
 class Api:
     """网页能调到的全部东西，都写在类里面。

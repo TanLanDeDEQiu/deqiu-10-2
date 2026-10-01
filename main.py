@@ -4,8 +4,21 @@ import os
 import base64
 import shutil
 from PIL import Image
+import sys
 
-APP_DIR = r"D:\记账本数据"
+def pick_app_dir():
+    if getattr(sys, 'frozen', False):
+        here = os.path.dirname(sys.executable)
+    else:
+        here = os.path.dirname(os.path.abspath(__file__))
+
+    portable = os.path.join(here,"data")
+    if os.path.exists(portable):
+        return portable
+
+    return os.path.join(os.environ["APPDATA"],"记账本")
+
+APP_DIR = pick_app_dir()
 os.makedirs(os.path.join(APP_DIR, "images"), exist_ok=True)
 DB = os.path.join(APP_DIR, "记账.db")
 
@@ -203,6 +216,7 @@ def get_plans():
 
 #目标
 def create_target(target_name, target_money, target_rate, target_picture):
+    target_money = check_money(target_money,"目标金额")
     try:
         target_rate = float(target_rate)
     except (TypeError, ValueError):

@@ -7,3 +7,8 @@ __pycache__/
 
 # 界面预览图（随时能重新生成）
 preview/
+
+# 打包生成的东西（PyInstaller 的配方和产物）
+*.spec
+build/
+dist/
