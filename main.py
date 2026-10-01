@@ -51,6 +51,32 @@ def pre_load():
 
 
 
+
+#设置
+def set_start_money():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    set_money = input("请设置初始余额：")
+    c.execute("UPDATE 设置 SET start_money = ?", (set_money,))
+    print(f"改了{c.rowcount}行")
+    conn.commit()
+    conn.close()
+
+def get_balance():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    start = c.execute("""SELECT start_money FROM 设置""").fetchone()[0]
+    income = c.execute("""SELECT SUM(operation_money) FROM 记录 
+                              WHERE operation_type = ?""", ('收入',)).fetchone()[0] or 0
+    expense = c.execute("""SELECT SUM(operation_money) FROM 记录 
+                               WHERE operation_type = ?""", ('支出',)).fetchone()[0] or 0
+    balance = start + income - expense
+    conn.close()
+    return balance
+
+
+
+#记录
 def a_record(operation_type, operation_money, operation_remark, operation_date, plan_money_key=None):
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -69,16 +95,58 @@ def all_show():
                                     ORDER BY operation_date DESC"""):
         print(f'==========记录==========\n[类型]:{a1}\n[金额]:{a2}\n[备注]:{a3}\n[日期]:{a4}\n=======================')
 
-def show_balance():
+def show_balance(balance):
+    print(f"当前余额：{balance}")
+
+
+#预算
+def create_plan(plan_money_purpose,plan_money,plan_picture):
     conn = sqlite3.connect(DB)
     c = conn.cursor()
-    start = c.execute("""SELECT start_money FROM 设置""").fetchone()[0]
-    income = c.execute("""SELECT SUM(operation_money) FROM 记录 
-                          WHERE operation_type = ?""", ('收入',)).fetchone()[0] or 0
-    expense = c.execute("""SELECT SUM(operation_money) FROM 记录 
-                           WHERE operation_type = ?""", ('支出',)).fetchone()[0] or 0
-    balance = start + income - expense
-    print(f"当前余额：{balance}")
+    c.execute("""
+    INSERT INTO 预算 (plan_money_purpose, plan_money, plan_picture, plan_created_at)
+    Values (?, ?, ?, ?)
+    """,(plan_money_purpose,plan_money,plan_picture,time.strftime("%Y-%m-%d", time.localtime(time.time()))))
+    conn.commit()
+    conn.close()
+
+def all_show_plan():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    for a,a1,a2,a3,a4 in c.execute("""SELECT plan_money_key, plan_money_purpose, plan_money, plan_picture, plan_created_at FROM 预算"""):
+        print(f"========预算{a:04d}========\n[预算目的]:{a1}\n[预算金额]:{a2}\n[创建日期]:{a4}\n=======================")
+
+def delete_plan(plan_money_key):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("""DELETE FROM 预算 WHERE plan_money_key = ?""", (plan_money_key,))
+    print(f"删除了{c.rowcount}行")
+    conn.commit()
+    conn.close()
+
+
+#目标
+def create_target(target_name, target_money, target_rate, target_picture):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("""
+    INSERT INTO 目标 (target_name, target_money, target_rate, target_picture, target_created_at) 
+    Values (?, ?, ?, ?, ?)""",(target_name,target_money,target_rate,target_picture,time.strftime("%Y-%m-%d", time.localtime(time.time()))))
+    conn.commit()
+    conn.close()
+
+def all_show_target():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    for a,a1,a2,a3,a4,a5 in c.execute("""SELECT target_key, target_name, target_money, target_rate, target_picture, target_created_at FROM 目标"""):
+        print(f"========目标{a:04d}========\n[目标内容]:{a1}\n[目标金额]:{a2}\n[目标占比]:{a3}\n[创建日期]:{a5}\n======================")
+
+def delete_target(target_key):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("DELETE FROM 目标 WHERE target_key = ?",(target_key,))
+    print(f"删除了{c.rowcount}行")
+    conn.commit()
     conn.close()
 
 
@@ -87,7 +155,7 @@ def show_balance():
 def main():
     pre_load()
     while True:
-        print('打印菜单：   \n1. 记一笔    \n2. 看全部    \n3.看余额    \n0. 退出     ')
+        print('打印菜单：   \n1.记一笔    \n2.看全部    \n3.看余额    \n4.重置余额    \n5.预算    \n6.目标    \n0.退出     ')
         choice = input("请选择：")
         if choice == '1':
             operation_type = input("请输入类型：")
@@ -99,7 +167,44 @@ def main():
         elif choice == '2':
             all_show()
         elif choice == '3':
-            show_balance()
+            show_balance(get_balance())
+        elif choice == '4':
+            set_start_money()
+        elif choice == '5':
+            while True:
+                print("\n1.创建新的预算计划    \n2.查看所有的预算    \n3.删除一个预算    \n0.退出")
+                choice1 = input("请选择：")
+                if choice1 == '1':
+                    plan_money_purpose = input("请输入预算目的：")
+                    plan_money = input("请输入预算金额：")
+                    plan_picture = None
+                    create_plan(plan_money_purpose,plan_money,plan_picture)
+                elif choice1 == '2':
+                    all_show_plan()
+                elif choice1 == '3':
+                    all_show_plan()
+                    plan_money_key = input("请输入要删除预算的对应编号：")
+                    delete_plan(plan_money_key)
+                elif choice1 == '0':
+                    break
+        elif choice == '6':
+            while True:
+                print("\n1.创建新的目标计划    \n2.查看所有的目标    \n3.删除一个目标    \n0.退出")
+                choice2 = input("请选择：")
+                if choice2 == '1':
+                    target_name = input("请输入目标内容：")
+                    target_money = input("请输入目标金额：")
+                    target_rate = input("请输入占比：")
+                    target_picture = None
+                    create_target(target_name,target_money,target_rate,target_picture)
+                elif choice2 == '2':
+                    all_show_target()
+                elif choice2 == '3':
+                    all_show_target()
+                    target_key = input("请输入要删除目标的对应编号：")
+                    delete_target(target_key)
+                elif choice2 == '0':
+                    break
         elif choice == '0':
             break
 if __name__ == "__main__":
