@@ -1,7 +1,173 @@
 // pywebview 准备就绪后会广播一个事件。
-// 必须等它，不然这个脚本跑的时候，pywebview 还没挂上来。
+// 必须等它，不然脚本跑的时候 pywebview 还没挂上来。
 window.addEventListener("pywebviewready", async () => {
-    const balance = await pywebview.api.get_balance();
-
-    document.getElementById("balance").textContent = balance.toFixed(2);
+    setupTabs();
+    setupSheet();
+    setupAllPage();
+    await refresh();
 });
+
+
+// 底部三个格子：点谁，就显示谁那一页
+function setupTabs() {
+    const tabs = document.querySelectorAll(".tab");
+    const pages = document.querySelectorAll(".page");
+
+    tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+            tabs.forEach((t) => t.classList.remove("active"));
+            pages.forEach((p) => p.classList.remove("show"));
+
+            tab.classList.add("active");
+            document.getElementById("page-" + tab.dataset.page).classList.add("show");
+        });
+    });
+}
+
+
+// 把界面重画一遍。数据全问 Python 要，网页自己不算账。
+async function refresh() {
+    const balance = await pywebview.api.get_balance();
+    document.getElementById("balance").textContent = balance.toFixed(2);
+
+    const rows = await pywebview.api.get_records(null, 5);
+    document.getElementById("records").innerHTML = rows.map(rowCard).join("");
+}
+
+
+// 一条记录 → 一张卡片
+function rowCard(record) {
+    const isIncome = record.operation_type === "收入";
+    const side = isIncome ? "in" : "out";
+    const sign = isIncome ? "+" : "−";
+
+    return `
+        <div class="row">
+            <div class="row-top">
+                <span class="type">${record.operation_type}</span>
+                <span class="money ${side}">${sign}${record.operation_money.toFixed(2)}</span>
+            </div>
+            <div class="remark">${record.operation_remark ?? ""}</div>
+        </div>
+    `;
+}
+
+
+// ---- 记一笔 ----
+
+function setupSheet() {
+    const mask = document.getElementById("sheet-mask");
+
+    document.getElementById("btn-add").addEventListener("click", openSheet);
+    document.getElementById("btn-close").addEventListener("click", closeSheet);
+    document.getElementById("btn-save").addEventListener("click", saveRecord);
+
+    // 点背景（弹窗外面的暗色）也能关掉
+    mask.addEventListener("click", (e) => {
+        if (e.target === mask) closeSheet();
+    });
+
+    // 类型那两个药丸：点谁谁亮
+    document.querySelectorAll("#seg-type .seg-item").forEach((item) => {
+        item.addEventListener("click", () => {
+            document.querySelectorAll("#seg-type .seg-item")
+                    .forEach((x) => x.classList.remove("active"));
+            item.classList.add("active");
+        });
+    });
+}
+
+
+function openSheet() {
+    document.getElementById("in-money").value = "";
+    document.getElementById("in-remark").value = "";
+    document.getElementById("err").textContent = "";
+    document.getElementById("sheet-mask").classList.add("show");
+    document.getElementById("in-money").focus();
+}
+
+
+function closeSheet() {
+    document.getElementById("sheet-mask").classList.remove("show");
+}
+
+
+async function saveRecord() {
+    const type = document.querySelector("#seg-type .seg-item.active").dataset.type;
+    const money = document.getElementById("in-money").value;
+    const remark = document.getElementById("in-remark").value;
+    const errBox = document.getElementById("err");
+
+    if (money === "") {
+        errBox.textContent = "金额还没填";
+        return;
+    }
+
+    try {
+        await pywebview.api.add_record(type, money, remark);
+    } catch (e) {
+        // 后端校验没过（比如金额不是数字），它会把原因抛回来
+        errBox.textContent = String(e);
+        return;
+    }
+
+    closeSheet();
+    await refresh();
+}
+
+
+// ---- 总记录页 ----
+
+let onlyFilter = "";        // "" = 全部，"收入" / "支出" = 只看那一类
+
+function setupAllPage() {
+    document.getElementById("btn-all").addEventListener("click", () => {
+        showPage("all");
+        refreshAll();
+    });
+
+    document.getElementById("btn-back").addEventListener("click", () => {
+        showPage("home");
+        markTab("home");
+    });
+
+    document.getElementById("btn-filter").addEventListener("click", () => {
+        document.getElementById("filter-panel").classList.toggle("show");
+    });
+
+    document.querySelectorAll("#filter-panel .opt").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll("#filter-panel .opt")
+                    .forEach((x) => x.classList.remove("active"));
+            btn.classList.add("active");
+            onlyFilter = btn.dataset.only;
+            refreshAll();
+        });
+    });
+}
+
+
+function showPage(name) {
+    document.querySelectorAll(".page").forEach((p) => p.classList.remove("show"));
+    document.getElementById("page-" + name).classList.add("show");
+}
+
+
+function markTab(name) {
+    document.querySelectorAll(".tab").forEach((t) => {
+        t.classList.toggle("active", t.dataset.page === name);
+    });
+}
+
+
+async function refreshAll() {
+    const only = onlyFilter || null;
+
+    const s = await pywebview.api.get_summary(only);
+    document.getElementById("all-count").textContent = s.count;
+    document.getElementById("all-income").textContent = s.income.toFixed(0);
+    document.getElementById("all-expense").textContent = s.expense.toFixed(0);
+
+    const rows = await pywebview.api.get_records(only);
+    document.getElementById("all-records").innerHTML = rows.map(rowCard).join("");
+}

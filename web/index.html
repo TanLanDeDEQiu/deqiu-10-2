@@ -7,10 +7,113 @@
 </head>
 <body>
 
-    <header>
-        <div class="label">当前余额</div>
-        <div class="balance" id="balance">--</div>
-    </header>
+    <main>
+        <!-- 主页 -->
+        <section class="page show" id="page-home">
+            <header class="balance-card">
+                <div class="label">当前余额</div>
+                <div class="balance" id="balance">--</div>
+            </header>
+
+            <div class="list-head">
+                <span>最近记录</span>
+                <button class="link" id="btn-all">总记录 ›</button>
+            </div>
+            <div class="records" id="records"></div>
+        </section>
+
+        <!-- 目标 -->
+        <section class="page" id="page-target">
+            <div class="list-head"><span>目标</span></div>
+            <div class="cards" id="targets"></div>
+        </section>
+
+        <!-- 预算 -->
+        <section class="page" id="page-plan">
+            <div class="list-head"><span>预算</span></div>
+            <div class="cards" id="plans"></div>
+        </section>
+
+        <!-- 总记录（从主页那个「总记录 ›」进来） -->
+        <section class="page" id="page-all">
+            <div class="sub-head">
+                <button class="back" id="btn-back">‹</button>
+                <span class="sub-title">总记录</span>
+                <button class="link" id="btn-filter">筛选</button>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat"><b id="all-count">0</b><span>条记录</span></div>
+                <div class="stat"><b id="all-income">0</b><span>总收入</span></div>
+                <div class="stat"><b id="all-expense">0</b><span>总支出</span></div>
+            </div>
+
+            <div class="filter-panel" id="filter-panel">
+                <button class="opt active" data-only="">全部</button>
+                <button class="opt" data-only="收入">只看收入</button>
+                <button class="opt" data-only="支出">只看支出</button>
+            </div>
+
+            <div class="records" id="all-records"></div>
+        </section>
+    </main>
+
+    <nav class="tabbar">
+        <button class="tab" data-page="target">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="8"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>目标</span>
+        </button>
+        <button class="tab active" data-page="home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M4 11 L12 4 L20 11"/>
+                <path d="M6.5 9.8 V20 H17.5 V9.8"/>
+            </svg>
+            <span>主页</span>
+        </button>
+        <button class="tab" data-page="plan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="4" y="6" width="16" height="13" rx="2.5"/>
+                <path d="M4 10.5 H20"/>
+            </svg>
+            <span>预算</span>
+        </button>
+    </nav>
+
+    <button class="fab" id="btn-add">记</button>
+
+    <!-- 记一笔 -->
+    <div class="sheet-mask" id="sheet-mask">
+        <div class="sheet">
+            <div class="sheet-head">
+                <span>记一笔</span>
+                <button class="close" id="btn-close">×</button>
+            </div>
+
+            <div class="field">
+                <span class="field-label">类型</span>
+                <div class="seg" id="seg-type">
+                    <button class="seg-item active" data-type="支出">支出</button>
+                    <button class="seg-item" data-type="收入">收入</button>
+                </div>
+            </div>
+
+            <div class="field">
+                <span class="field-label">金额</span>
+                <input type="number" id="in-money" placeholder="0.00" step="0.01">
+            </div>
+
+            <div class="field">
+                <span class="field-label">备注</span>
+                <input type="text" id="in-remark" placeholder="选填">
+            </div>
+
+            <div class="err" id="err"></div>
+            <button class="primary" id="btn-save">保存</button>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>

@@ -1,5 +1,8 @@
 import time
 print(time.strftime("%Y-%m-%d", time.localtime(time.time())))
-a = "abc"
+a = 1234
 a = f"{a:04d}"
 print(a)
+import main
+print(main.get_records())
+print(main.get_records('支出'))

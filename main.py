@@ -113,25 +113,14 @@ def a_record(operation_type, operation_money, operation_remark, operation_date, 
     conn.close()
 
 def all_show(only=None):
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    sql = """SELECT main_key, operation_type, operation_money, operation_remark, operation_date FROM 记录"""
-    args = ()
-    where = ""
-    if only:
-        where += " WHERE operation_type = ?"
-        args = (only,)
-    count = c.execute("SELECT COUNT(*) FROM 记录" + where, args).fetchone()[0]
-    income, expense = get_income_expense()
-    if only == '支出':
-        income = 0
-    elif only == '收入':
-        expense = 0
-    print(f"总记录（共{count}条）    总收入：{income}     总支出：{expense}")
-    sql += where + " ORDER BY operation_date DESC, main_key DESC"
-    for a,a1,a2,a3,a4 in c.execute(sql,args):
-        print(f'==========记录{a:04d}==========\n[类型]:{a1}\n[金额]:{a2}\n[备注]:{a3}\n[日期]:{a4}\n===========================')
-    conn.close()
+    rows = get_records(only)
+    s = get_summary(only)
+    print(f"总记录（共{s['count']}条）    总收入：{s['income']}     总支出：{s['expense']}")
+    for r in rows:
+        print(f'==========记录{r["main_key"]:04d}==========\n'
+              f'[类型]:{r["operation_type"]}\n[金额]:{r["operation_money"]}\n'
+              f'[备注]:{r["operation_remark"]}\n[日期]:{r["operation_date"]}\n'
+              f'===========================')
 
 def show_balance(balance):
     print(f"当前余额：{balance}")
@@ -212,6 +201,43 @@ def delete_target(target_key):
     conn.close()
 
 
+######
+
+
+def get_records(only=None, limit=None):
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    where = ""
+    args = ()
+    if only:
+        where = " WHERE operation_type = ? "
+        args = (only,)
+    sql = """ SELECT main_key, operation_type, operation_money, operation_remark, operation_date 
+            FROM 记录 """ + where + " ORDER BY operation_date DESC, main_key DESC "
+    if limit:
+        sql += "LIMIT ? "
+        args = args + (limit,)
+    rows = c.execute(sql,args).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def get_summary(only=None):
+    where =''
+    args = ()
+    if only:
+        where = " WHERE operation_type = ? "
+        args = (only,)
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    count = c.execute("SELECT COUNT(*) FROM 记录 " + where, args).fetchone()[0]
+    conn.close()
+    income,expense = get_income_expense()
+    if only == '支出':
+        income = 0
+    elif only == '收入':
+        expense = 0
+    return {"count":count,"income":income,"expense":expense}
 
 
 def main():

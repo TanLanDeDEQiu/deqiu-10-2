@@ -4,6 +4,7 @@
 界面显示什么、长什么样，全在 web/ 里面。
 """
 import os
+import time
 
 import webview
 
@@ -22,6 +23,16 @@ class Api:
 
     def get_balance(self):
         return main.get_balance()
+
+    def get_records(self, only=None, limit=None):
+        return main.get_records(only, limit)
+
+    def add_record(self, operation_type, money, remark):
+        today = time.strftime("%Y-%m-%d", time.localtime())
+        main.a_record(operation_type, money, remark, today)
+
+    def get_summary(self, only=None):
+        return main.get_summary(only)
 
 
 if __name__ == "__main__":
