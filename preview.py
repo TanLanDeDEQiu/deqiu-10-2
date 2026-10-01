@@ -31,11 +31,26 @@ window.pywebview = { api: {
         if (only === "支出") return {count: 2, income: 0, expense: 328.5};
         return {count: 3, income: 500.0, expense: 328.5};
     },
+    get_targets: async () => [
+        {target_key: 1, target_name: "买电脑", target_money: 30000.0, target_rate: 0.3, target_picture: null, need: 100000.0, progress: 4.3},
+        {target_key: 2, target_name: "相机", target_money: 8000.0, target_rate: 0.5, target_picture: null, need: 16000.0, progress: 26.88},
+    ],
+    create_target: async () => null,
+    delete_target: async () => null,
 }};
 window.dispatchEvent(new Event("pywebviewready"));
 setTimeout(() => {
     if (location.hash === "#sheet") document.getElementById("btn-add").click();
-    if (location.hash === "#all") document.getElementById("btn-all").click();
+    if (location.hash === "#all") { markTab("home"); showPage("all"); refreshAll(); }
+    if (location.hash === "#target") { markTab("target"); showPage("target"); }
+    if (location.hash === "#tnew") {
+        markTab("target"); showPage("target");
+        document.getElementById("btn-new-target").click();
+    }
+    if (location.hash === "#tdel") {
+        markTab("target"); showPage("target");
+        document.getElementById("btn-del-target").click();
+    }
 }, 150);
 </script>
 """

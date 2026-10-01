@@ -24,7 +24,11 @@
 
         <!-- 目标 -->
         <section class="page" id="page-target">
-            <div class="list-head"><span>目标</span></div>
+            <div class="sub-head">
+                <span class="sub-title">目标</span>
+                <button class="link" id="btn-new-target">创建新的</button>
+                <button class="link danger" id="btn-del-target">删除一个</button>
+            </div>
             <div class="cards" id="targets"></div>
         </section>
 
@@ -83,6 +87,34 @@
     </nav>
 
     <button class="fab" id="btn-add">记</button>
+
+    <!-- 创建目标 -->
+    <div class="sheet-mask" id="target-sheet">
+        <div class="sheet">
+            <div class="sheet-head">
+                <span>创建目标</span>
+                <button class="close" id="btn-close-target">×</button>
+            </div>
+
+            <div class="field">
+                <span class="field-label">目标</span>
+                <input type="text" id="t-name" placeholder="比如：买电脑">
+            </div>
+
+            <div class="field">
+                <span class="field-label">目标金额</span>
+                <input type="number" id="t-money" placeholder="0.00" step="0.01">
+            </div>
+
+            <div class="field">
+                <span class="field-label">占比</span>
+                <input type="number" id="t-rate" placeholder="0.3" step="0.05" min="0.01">
+            </div>
+
+            <div class="err" id="t-err"></div>
+            <button class="primary" id="btn-save-target">保存</button>
+        </div>
+    </div>
 
     <!-- 记一笔 -->
     <div class="sheet-mask" id="sheet-mask">

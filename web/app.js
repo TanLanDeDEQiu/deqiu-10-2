@@ -4,6 +4,7 @@ window.addEventListener("pywebviewready", async () => {
     setupTabs();
     setupSheet();
     setupAllPage();
+    setupTargetPage();
     await refresh();
 });
 
@@ -32,6 +33,9 @@ async function refresh() {
 
     const rows = await pywebview.api.get_records(null, 5);
     document.getElementById("records").innerHTML = rows.map(rowCard).join("");
+
+    const targets = await pywebview.api.get_targets();
+    document.getElementById("targets").innerHTML = targets.map(targetCard).join("");
 }
 
 
@@ -50,6 +54,86 @@ function rowCard(record) {
             <div class="remark">${record.operation_remark ?? ""}</div>
         </div>
     `;
+}
+
+
+// 一条目标 → 一张卡片
+function targetCard(target) {
+    const pct = Math.min(target.progress, 100);   // 进度条最多画满
+
+    return `
+        <div class="tcard">
+            <div class="tcard-bg"></div>
+            <button class="tcard-del" data-key="${target.target_key}">×</button>
+            <div class="tcard-body">
+                <div class="tcard-name">${target.target_name}</div>
+                <div class="tcard-sub">目标 ${target.target_money.toFixed(0)} 元 · 占比 ${(target.target_rate * 100).toFixed(0)}%</div>
+                <div class="bar"><i style="width: ${pct}%"></i></div>
+                <div class="tcard-pct">进度 ${target.progress.toFixed(2)}%</div>
+            </div>
+        </div>
+    `;
+}
+
+
+// ---- 目标的 创建 / 删除 ----
+
+function setupTargetPage() {
+    const mask = document.getElementById("target-sheet");
+
+    document.getElementById("btn-new-target").addEventListener("click", () => {
+        document.getElementById("t-name").value = "";
+        document.getElementById("t-money").value = "";
+        document.getElementById("t-rate").value = "";
+        document.getElementById("t-err").textContent = "";
+        mask.classList.add("show");
+        document.getElementById("t-name").focus();
+    });
+
+    document.getElementById("btn-close-target").addEventListener("click", () => {
+        mask.classList.remove("show");
+    });
+
+    mask.addEventListener("click", (e) => {
+        if (e.target === mask) mask.classList.remove("show");
+    });
+
+    document.getElementById("btn-save-target").addEventListener("click", saveTarget);
+
+    // 「删除一个」：点一下，卡片上浮出小叉；再点一下收回去
+    document.getElementById("btn-del-target").addEventListener("click", () => {
+        document.getElementById("targets").classList.toggle("deleting");
+    });
+
+    // 小叉是动态生成的，所以用"代理"接：点在容器上，看点是哪个
+    document.getElementById("targets").addEventListener("click", async (e) => {
+        const btn = e.target.closest(".tcard-del");
+        if (!btn) return;
+        await pywebview.api.delete_target(Number(btn.dataset.key));
+        await refresh();
+    });
+}
+
+
+async function saveTarget() {
+    const name = document.getElementById("t-name").value;
+    const money = document.getElementById("t-money").value;
+    const rate = document.getElementById("t-rate").value;
+    const errBox = document.getElementById("t-err");
+
+    if (name === "") { errBox.textContent = "目标名字还没写"; return; }
+    if (money === "") { errBox.textContent = "金额还没填"; return; }
+    if (rate === "") { errBox.textContent = "占比还没填"; return; }
+
+    try {
+        await pywebview.api.create_target(name, money, rate);
+    } catch (e) {
+        errBox.textContent = String(e);
+        return;
+    }
+
+    document.getElementById("target-sheet").classList.remove("show");
+    await refresh();
 }
 
 

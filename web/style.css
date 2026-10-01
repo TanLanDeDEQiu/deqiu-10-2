@@ -321,3 +321,95 @@ main {
     color: var(--brand);
     font-weight: 600;
 }
+
+/* ---- 目标卡片 ---- */
+.sub-head .link { margin-left: 14px; }
+.sub-head .danger { color: var(--out); }
+
+.tcard {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    min-height: 132px;
+    box-shadow: var(--shadow);
+    color: #fff;
+}
+
+.tcard-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #6a4df5, #3b6ef5);
+}
+
+.tcard:nth-child(2n) .tcard-bg {
+    background: linear-gradient(135deg, #f2994a, #e0524f);
+}
+
+.tcard:nth-child(3n) .tcard-bg {
+    background: linear-gradient(135deg, #11998e, #38b2ac);
+}
+
+.tcard-body {
+    position: relative;
+    min-height: 132px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.tcard-name {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.tcard-sub {
+    margin-top: 4px;
+    font-size: 12.5px;
+    opacity: 0.85;
+}
+
+.bar {
+    margin-top: 10px;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.32);
+    overflow: hidden;
+}
+
+.bar i {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: #fff;
+    transition: width 0.3s;
+}
+
+.tcard-pct {
+    margin-top: 6px;
+    font-size: 12.5px;
+    text-align: right;
+    opacity: 0.92;
+}
+
+/* 卡片右上角那个删除小叉，平时藏着 */
+.tcard-del {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--out);
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+#targets.deleting .tcard-del { display: flex; }

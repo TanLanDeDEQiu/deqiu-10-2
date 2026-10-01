@@ -34,6 +34,15 @@ class Api:
     def get_summary(self, only=None):
         return main.get_summary(only)
 
+    def get_targets(self):
+        return main.get_targets()
+
+    def create_target(self, name, money, rate):
+        main.create_target(name, money, rate, None)
+
+    def delete_target(self, target_key):
+        main.delete_target(target_key)
+
 
 if __name__ == "__main__":
     webview.create_window(

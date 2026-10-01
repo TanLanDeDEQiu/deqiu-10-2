@@ -203,6 +203,21 @@ def delete_target(target_key):
 
 ######
 
+def get_targets():
+    balance = get_balance()
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    rows = c.execute("""SELECT target_key, target_name, target_money, target_rate, target_picture, target_created_at FROM 目标""").fetchall()
+    conn.close()
+    results = []
+    for r in rows:
+        item = dict(r)
+        item['need'] = r['target_money'] / r['target_rate']
+        item['progress'] = balance / item['need'] * 100
+        results.append(item)
+    return results
+
 
 def get_records(only=None, limit=None):
     conn = sqlite3.connect(DB)
@@ -238,6 +253,8 @@ def get_summary(only=None):
     elif only == '收入':
         expense = 0
     return {"count":count,"income":income,"expense":expense}
+
+
 
 
 def main():
