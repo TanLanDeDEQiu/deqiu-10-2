@@ -27,9 +27,9 @@ class Api:
     def get_records(self, only=None, limit=None):
         return main.get_records(only, limit)
 
-    def add_record(self, operation_type, money, remark):
+    def add_record(self, operation_type, money, remark, plan_key=None):
         today = time.strftime("%Y-%m-%d", time.localtime())
-        main.a_record(operation_type, money, remark, today)
+        main.a_record(operation_type, money, remark, today, plan_key)
 
     def get_summary(self, only=None):
         return main.get_summary(only)

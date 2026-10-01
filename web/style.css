@@ -237,6 +237,22 @@ main {
 
 .field input:focus { border-color: var(--brand); }
 
+.field select {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid #e3e6ec;
+    border-radius: 11px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    background: #fff;
+    outline: none;
+}
+
+.field select:focus { border-color: var(--brand); }
+
+.seg .seg-item { font-size: 13px; }
+
 .err {
     min-height: 18px;
     margin-top: 10px;

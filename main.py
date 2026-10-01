@@ -97,6 +97,8 @@ def ask_key(prompt):
 
 #记录
 def a_record(operation_type, operation_money, operation_remark, operation_date, plan_money_key=None):
+    if operation_type == '预算支出':
+        operation_type = "支出"
     if operation_type not in ("支出","收入"):
         raise ValueError(f"类型不对：{operation_type}")
     try:
@@ -289,10 +291,6 @@ def main():
             operation_money = input("请输入金额：")
             operation_remark = input("请输入备注：")
             operation_date = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-            if operation_type == '预算支出':
-                all_show_plan()
-                plan_money_key = ask_key("挂在哪个预算上（输编号）：")
-                operation_type = '支出'  # ⭐ 这一行是关键
             try:
                 a_record(operation_type, operation_money, operation_remark, operation_date, plan_money_key)
                 print(f"已添加一条记录。\n[类型]:{operation_type}\n[金额]:{operation_money}\n[备注]:{operation_remark}\n[日期]:{operation_date}")

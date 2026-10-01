@@ -48,6 +48,12 @@ window.pywebview = { api: {
 window.dispatchEvent(new Event("pywebviewready"));
 setTimeout(() => {
     if (location.hash === "#sheet") document.getElementById("btn-add").click();
+    if (location.hash === "#bs") {
+        document.getElementById("btn-add").click();
+        setTimeout(() => {
+            document.querySelector("#seg-type [data-type=\\'\\u9884\\u7b97\\u652f\\u51fa\\']").click();
+        }, 200);
+    }
     if (location.hash === "#all") { markTab("home"); showPage("all"); refreshAll(); }
     if (location.hash === "#target") { markTab("target"); showPage("target"); }
     if (location.hash === "#tnew") {

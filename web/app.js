@@ -243,6 +243,7 @@ function setupSheet() {
             document.querySelectorAll("#seg-type .seg-item")
                     .forEach((x) => x.classList.remove("active"));
             item.classList.add("active");
+            pickPlanIfNeeded();
         });
     });
 }
@@ -254,6 +255,25 @@ function openSheet() {
     document.getElementById("err").textContent = "";
     document.getElementById("sheet-mask").classList.add("show");
     document.getElementById("in-money").focus();
+    pickPlanIfNeeded();
+}
+
+
+// 选了「预算支出」才把预算下拉露出来，并且把选项装满
+async function pickPlanIfNeeded() {
+    const type = document.querySelector("#seg-type .seg-item.active").dataset.type;
+    const box = document.getElementById("plan-pick");
+
+    if (type !== "预算支出") {
+        box.style.display = "none";
+        return;
+    }
+
+    box.style.display = "block";
+    const plans = await pywebview.api.get_plans();
+    document.getElementById("in-plan").innerHTML = plans
+        .map((p) => `<option value="${p.plan_money_key}">${p.plan_money_purpose}（剩 ${p.left.toFixed(0)}）</option>`)
+        .join("");
 }
 
 
@@ -273,8 +293,17 @@ async function saveRecord() {
         return;
     }
 
+    let planKey = null;
+    if (type === "预算支出") {
+        planKey = Number(document.getElementById("in-plan").value);
+        if (!planKey) {
+            errBox.textContent = "还没有预算可以挂，先去预算页建一条";
+            return;
+        }
+    }
+
     try {
-        await pywebview.api.add_record(type, money, remark);
+        await pywebview.api.add_record(type, money, remark, planKey);
     } catch (e) {
         // 后端校验没过（比如金额不是数字），它会把原因抛回来
         errBox.textContent = String(e);
