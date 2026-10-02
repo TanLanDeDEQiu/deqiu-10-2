@@ -88,6 +88,7 @@ main {
 }
 
 .row {
+    position: relative;
     background: var(--card);
     border-radius: var(--radius);
     padding: 13px 16px;
@@ -480,6 +481,12 @@ main {
 
 #targets.deleting .tcard-del { display: flex; }
 
+/* ⭐ 小叉必须抬到 .tcard-body 之上。
+   原因：body 在 DOM 里排在按钮后面，两个都是定位元素，
+   不写 z-index 的话 body 会盖住按钮 —— 看得见，点不着。
+   （预算那边一直有 z-index: 2，这边漏了，所以只有目标删不掉。）*/
+.tcard-del { z-index: 2; }
+
 /* ---- 预算卡片（右边一根竖条）---- */
 .pcard {
     position: relative;
@@ -590,3 +597,27 @@ main {
 #plans.deleting .pcard-del { display: flex; }
 
 .pcard-del { z-index: 2; }
+
+
+/* ---- 记录行上的删除小叉 ----
+   一直显示。记录条数多，"先点删除模式"那种藏法更找不到。 */
+.row-del {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--out);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+.row-del:hover { background: rgba(224, 82, 79, 0.16); }
+.row { padding-right: 44px; }

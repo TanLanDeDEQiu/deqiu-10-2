@@ -6,6 +6,7 @@ window.addEventListener("pywebviewready", async () => {
     setupAllPage();
     setupTargetPage();
     setupPlanPage();
+    setupRecordDelete();
     await refresh();
 });
 
@@ -63,12 +64,13 @@ function rowCard(record) {
     const sign = isIncome ? "+" : "−";
 
     return `
-        <div class="row">
+        <div class="row" data-key="${record.main_key}">
             <div class="row-top">
                 <span class="type">${record.operation_type}</span>
                 <span class="money ${side}">${sign}${record.operation_money.toFixed(2)}</span>
             </div>
             <div class="remark">${record.operation_remark ?? ""}</div>
+            <button class="row-del" data-key="${record.main_key}" title="删除这条">×</button>
         </div>
     `;
 }
@@ -442,6 +444,24 @@ function setupAllPage() {
             btn.classList.add("active");
             onlyFilter = btn.dataset.only;
             refreshAll();
+        });
+    });
+}
+
+
+// 记录行上的删除。每条右边一个叉，一直显示 ——
+// 记录条数多，如果也搞"先点删除模式"，用户更找不到。
+function setupRecordDelete() {
+    ["records", "all-records"].forEach((id) => {
+        document.getElementById(id).addEventListener("click", async (e) => {
+            const btn = e.target.closest(".row-del");
+            if (!btn) return;
+            await pywebview.api.delete_record(Number(btn.dataset.key));
+            await refresh();
+            // 如果现在就在"总记录"页，顺带把它也刷一遍
+            if (document.getElementById("page-all").classList.contains("show")) {
+                await refreshAll();
+            }
         });
     });
 }

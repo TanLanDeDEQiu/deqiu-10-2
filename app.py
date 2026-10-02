@@ -51,6 +51,9 @@ class Api:
     def delete_target(self, target_key):
         main.delete_target(target_key)
 
+    def delete_record(self, main_key):
+        main.delete_record(main_key)
+
     def get_plans(self):
         plans = main.get_plans()
         for p in plans:
