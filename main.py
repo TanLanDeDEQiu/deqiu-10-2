@@ -68,6 +68,13 @@ def pre_load():
     conn.commit()
 
 
+# ⭐ 只要 import 这个模块，就保证表存在。
+#    桌面版 app.py 走的是 import，不会执行 main()，
+#    所以这个调用必须放在模块层 —— 只放在 main() 里的话，
+#    别人拿到的是空库，一保存就报 no such table。
+pre_load()
+
+
 
 
 #设置
