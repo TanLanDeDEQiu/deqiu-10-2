@@ -1,3 +1,26 @@
+// ⭐ 出错就当场显示出来，别默默失败。
+// 以前任何 JS 异常都是"悄无声息"的 —— 点了没反应，谁也不知道为什么。
+window.addEventListener("error", (e) => {
+    try {
+        let bar = document.getElementById("js-err-bar");
+        if (!bar) {
+            bar = document.createElement("div");
+            bar.id = "js-err-bar";
+            document.body.appendChild(bar);
+        }
+        bar.textContent = "⚠️ 程序出错：" + (e.message || e.error || "未知") + " —— 截图发给诺瓦";
+        bar.classList.add("show");
+    } catch (_) {}
+});
+window.addEventListener("unhandledrejection", (e) => {
+    try {
+        let bar = document.getElementById("js-err-bar");
+        if (!bar) { bar = document.createElement("div"); bar.id = "js-err-bar"; document.body.appendChild(bar); }
+        bar.textContent = "⚠️ 程序出错：" + (e.reason && e.reason.message ? e.reason.message : e.reason) + " —— 截图发给诺瓦";
+        bar.classList.add("show");
+    } catch (_) {}
+});
+
 // pywebview 准备就绪后会广播一个事件。
 // 必须等它，不然脚本跑的时候 pywebview 还没挂上来。
 window.addEventListener("pywebviewready", async () => {
@@ -7,6 +30,7 @@ window.addEventListener("pywebviewready", async () => {
     setupTargetPage();
     setupPlanPage();
     setupRecordDelete();
+    setupNumberFilters();
     await refresh();
 });
 
@@ -118,7 +142,8 @@ function setupTargetPage() {
         pickedTargetPic = null;
         document.getElementById("t-picked").textContent = "";
         mask.classList.add("show");
-        document.getElementById("t-name").focus();
+        // 延迟一点再聚焦：弹层有升起动画，动画期间 focus 有时不生效
+        setTimeout(() => document.getElementById("t-name").focus(), 80);
     });
 
     document.getElementById("t-pick").addEventListener("click", async () => {
@@ -219,7 +244,8 @@ function setupPlanPage() {
         pickedPlanPic = null;
         document.getElementById("p-picked").textContent = "";
         mask.classList.add("show");
-        document.getElementById("p-purpose").focus();
+        // 延迟一点再聚焦：弹层有升起动画，动画期间 focus 有时不生效
+        setTimeout(() => document.getElementById("p-purpose").focus(), 80);
     });
 
     document.getElementById("p-pick").addEventListener("click", async () => {
@@ -280,7 +306,8 @@ function openPlanEdit(card) {
     document.getElementById("pe-money").value = now;
     document.getElementById("pe-err").textContent = "";
     document.getElementById("plan-edit-sheet").classList.add("show");
-    document.getElementById("pe-money").focus();
+    // 延迟一点再聚焦：弹层有升起动画，动画期间 focus 有时不生效
+    setTimeout(() => document.getElementById("pe-money").focus(), 80);
 }
 
 
@@ -357,7 +384,8 @@ function openSheet() {
     document.getElementById("in-remark").value = "";
     document.getElementById("err").textContent = "";
     document.getElementById("sheet-mask").classList.add("show");
-    document.getElementById("in-money").focus();
+    // 延迟一点再聚焦：弹层有升起动画，动画期间 focus 有时不生效
+    setTimeout(() => document.getElementById("in-money").focus(), 80);
     pickPlanIfNeeded();
 }
 
@@ -462,6 +490,18 @@ function setupRecordDelete() {
             if (document.getElementById("page-all").classList.contains("show")) {
                 await refreshAll();
             }
+        });
+    });
+}
+
+
+// 这些框是"只能输数字"的。改成 type=text 是为了绕开中文输入法，
+// 所以过滤得自己做：只留数字和一个小数点。
+function setupNumberFilters() {
+    document.querySelectorAll('input[inputmode="decimal"]').forEach((el) => {
+        el.addEventListener("input", () => {
+            const cleaned = el.value.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
+            if (cleaned !== el.value) el.value = cleaned;
         });
     });
 }

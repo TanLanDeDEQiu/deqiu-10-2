@@ -621,3 +621,19 @@ main {
 }
 .row-del:hover { background: rgba(224, 82, 79, 0.16); }
 .row { padding-right: 44px; }
+/* ---- 出错红带：任何 JS 异常都会顶在最上面显示，不再默默失败 ---- */
+#js-err-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 999;
+    display: none;
+    padding: 10px 14px;
+    background: #e0524f;
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+#js-err-bar.show { display: block; }
