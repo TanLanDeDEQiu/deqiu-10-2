@@ -167,6 +167,12 @@ main {
     background: rgba(20, 24, 34, 0.32);
     display: none;
     align-items: flex-end;
+    /* ⭐ 必须有 z-index。
+       卡片那边有 `.has-pic .tcard-body { z-index: 1 }` ——
+       弹层不写 z-index（= auto）就会画在卡片下面，
+       结果是"看得见、点不着"：目标卡压住了创建框的名字和金额输入框。
+       2026-10-02 在真机上用 CDP 抓到：elementFromPoint 命中的是 DIV.bar / DIV.tcard-body。*/
+    z-index: 100;
 }
 
 .sheet-mask.show { display: flex; }
